@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ConcertrationMemoryGame</string>
+    <string name="start">START</string>
+    <string name="count">COUNT:</string>
+    <string name="congrat">Congrats!</string>
+    <string name="message">Your best try is </string>
+    <string name="restart">RESTART</string>
+    <string name="gohome">GO HOME</string>
+</resources>

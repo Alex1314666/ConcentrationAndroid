@@ -2,31 +2,40 @@ package yy.example.concertrationmemorygame
 
 import android.util.Log
 import android.widget.ImageButton
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class GameViewModel:ViewModel() {
 
     public lateinit var buttonFirstClick:ImageButton
     public lateinit var buttonSecondClick:ImageButton
-    private var foundPair: Int = 0
-    public var successPair: Int = 12
-    public var count:Int = 0
+
     public var imageIndexEnd:Int = 38
+    public var count:Int = 0
     public var imageButtonMap: HashMap<ImageButton,Int> = hashMapOf()
     public var buttonList: MutableList<ImageButton> = mutableListOf()
+    public var drawableMap:  HashMap<Int,Int> = hashMapOf()
+    public var drawableList: MutableList<Int> = mutableListOf()
     // lifecycle
     init {
         Log.i("GameViewModel","init")
 
     }
 
-
-    public fun foundPair(){
-        foundPair++
+    fun isFirstClick():Boolean{
+//        return count_.value!!.rem(2) == 0
+        return count % 2 == 0
+    }
+    fun onIncrementCount(){
+        count++
     }
 
-    public fun getPair():Int{
-        return foundPair
+    public fun gameEnd():Boolean{
+        if(imageButtonMap.isEmpty()){
+            return true
+        }
+        return false
     }
 
     override fun onCleared() {

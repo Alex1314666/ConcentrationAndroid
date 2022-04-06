@@ -1,5 +1,6 @@
 package yy.example.concertrationmemorygame
 
+import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -8,176 +9,143 @@ import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import org.intellij.lang.annotations.Identifier
+import yy.example.concertrationmemorygame.databinding.ActivityGameBinding
 import kotlin.random.Random
 
 class GameActivity : AppCompatActivity() {
 
     private lateinit var gameViewModel: GameViewModel
-    //declaring a map of integer(id) to UIButton
-//    private var imageIndexEnd:Int = 38
-//    private var imageButtonMap: HashMap<ImageButton,Int> = hashMapOf()
-//    private var buttonList: MutableList<ImageButton> = mutableListOf()
- //   private var pair:Int = 0
-//    private var count:Int = 0
-//    private lateinit var buttonFirstClick:ImageButton
-//    private lateinit var buttonSecondClick:ImageButton
+
     private lateinit var countScoreTextView:TextView
+    private lateinit var binding:ActivityGameBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_game)
+        // not using the old setContentView, need to use the binding version
+        // setContentView(R.layout.activity_game)
+
+        binding = DataBindingUtil.setContentView(this,R.layout.activity_game)
+        binding.viewModel = GameViewModel()
+        binding.executePendingBindings()
+        binding.lifecycleOwner = this
 
         gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
         countScoreTextView= findViewById(R.id.GameTextViewCountScore)
+        countScoreTextView.text = gameViewModel.count.toString()
+//        // binding.count = gameViewModel.count
         setUpGame()
-
-
+        Log.i("In onCreate", "Test")
     }
 
-
-    private fun setImageBack(button1:ImageButton, button2:ImageButton){
-       button1.setImageResource(R.drawable.card_background)
-       button2.setImageResource(R.drawable.card_background)
+    private fun setImageBack(button:ImageButton){
+       button.setImageResource(R.drawable.card_background)
     }
-
     private fun setImageFront(button:ImageButton,identifier: Int){
-        when(identifier){
-            0->{
-                button.setImageResource(R.drawable.card_00)
-            }
-            1->{
-                button.setImageResource(R.drawable.card_01)
-            }
-            2->{
-                button.setImageResource(R.drawable.card_02)
-            }
-            3->{
-                button.setImageResource(R.drawable.card_03)
-            }
-            4->{
-                button.setImageResource(R.drawable.card_04)
-            }
-            5->{
-                button.setImageResource(R.drawable.card_05 )
-            }
-            6->{
-                button.setImageResource(R.drawable.card_06)
-            }
-            7->{
-                button.setImageResource(R.drawable.card_07)
-            }
-            8->{
-                button.setImageResource(R.drawable.card_08)
-            }
-            9->{
-                button.setImageResource(R.drawable.card_09)
-            }
-            10->{
-                button.setImageResource(R.drawable.card_10)
-            }
-            11->{
-                button.setImageResource(R.drawable.card_11)
-            }
-            12->{
-                button.setImageResource(R.drawable.card_12)
-            }
-            13->{
-                button.setImageResource(R.drawable.card_13)
-            }
-            14->{
-                button.setImageResource(R.drawable.card_14 )
-            }
-            15->{
-                button.setImageResource(R.drawable.card_15)
-            }
-            16->{
-                button.setImageResource(R.drawable.card_16)
-            }
-            17->{
-                button.setImageResource(R.drawable.card_17)
-            }
-            18->{
-                button.setImageResource(R.drawable.card_18)
-            }
-            19->{
-                button.setImageResource(R.drawable.card_19)
-            }
-            20->{
-                button.setImageResource(R.drawable.card_20)
-            }
-            21->{
-                button.setImageResource(R.drawable.card_21)
-            }
-            22->{
-                button.setImageResource(R.drawable.card_22)
-            }
-            23->{
-                button.setImageResource(R.drawable.card_23)
-            }
-            24->{
-                button.setImageResource(R.drawable.card_24)
-            }
-            25->{
-                button.setImageResource(R.drawable.card_25)
-            }
-            26->{
-                button.setImageResource(R.drawable.card_26)
-            }
-            27->{
-                button.setImageResource(R.drawable.card_27)
-            }
-            28->{
-                button.setImageResource(R.drawable.card_28)
-            }
-            29->{
-                button.setImageResource(R.drawable.card_29)
-            }
-            30->{
-                button.setImageResource(R.drawable.card_30)
-            }
-            31->{
-                button.setImageResource(R.drawable.card_31)
-            }
-            32->{
-                button.setImageResource(R.drawable.card_32)
-            }
-            33->{
-                button.setImageResource(R.drawable.card_33)
-            }
-            34->{
-                button.setImageResource(R.drawable.card_34)
-            }
-            35->{
-                button.setImageResource(R.drawable.card_35)
-            }
-            36->{
-                button.setImageResource(R.drawable.card_36)
-            }
-            37->{
-                button.setImageResource(R.drawable.card_37)
-            }
-            38->{
-                button.setImageResource(R.drawable.card_38)
-            }
-        }
+        button.setImageResource(gameViewModel.drawableMap[identifier]!!)
     }
 
     private fun initialMap(){
-        val identifier = (0..gameViewModel.imageIndexEnd).random()
+        var identifier = gameViewModel.drawableList.random()
+        gameViewModel.drawableList.remove(identifier)
         gameViewModel.imageButtonMap[pickRandomFromList()] = identifier
         gameViewModel.imageButtonMap[pickRandomFromList()] = identifier
+
     }
+//    private fun initDrawableMap(){
+//        var identifier = 0
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_00
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_01
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_02
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_03
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_04
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_05
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_06
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_07
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_08
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_09
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_10
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_11
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_12
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_13
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_14
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_15
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_16
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_17
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_18
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_19
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_20
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_21
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_22
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_23
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_24
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_25
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_26
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_27
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_28
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_29
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_30
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_31
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_32
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_33
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_34
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_35
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_36
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_37
+//        gameViewModel.drawableMap[identifier++] = R.drawable.card_38
+//    }
 
     private fun pickRandomFromList(): ImageButton {
         var pick = gameViewModel.buttonList.random()
         gameViewModel.buttonList.remove(pick)
         return pick
     }
-
-    private fun setUpGame(){
+    private fun initDrawableList(){
+        gameViewModel.drawableList.add(R.drawable.card_00)
+        gameViewModel.drawableList.add(R.drawable.card_01)
+        gameViewModel.drawableList.add(R.drawable.card_02)
+        gameViewModel.drawableList.add(R.drawable.card_03)
+        gameViewModel.drawableList.add(R.drawable.card_04)
+        gameViewModel.drawableList.add(R.drawable.card_05)
+        gameViewModel.drawableList.add(R.drawable.card_06)
+        gameViewModel.drawableList.add(R.drawable.card_07)
+        gameViewModel.drawableList.add(R.drawable.card_08)
+        gameViewModel.drawableList.add(R.drawable.card_09)
+        gameViewModel.drawableList.add(R.drawable.card_10)
+        gameViewModel.drawableList.add(R.drawable.card_11)
+        gameViewModel.drawableList.add(R.drawable.card_12)
+        gameViewModel.drawableList.add(R.drawable.card_13)
+        gameViewModel.drawableList.add(R.drawable.card_14)
+        gameViewModel.drawableList.add(R.drawable.card_15)
+        gameViewModel.drawableList.add(R.drawable.card_16)
+        gameViewModel.drawableList.add(R.drawable.card_17)
+        gameViewModel.drawableList.add(R.drawable.card_18)
+        gameViewModel.drawableList.add(R.drawable.card_19)
+        gameViewModel.drawableList.add(R.drawable.card_20)
+        gameViewModel.drawableList.add(R.drawable.card_21)
+        gameViewModel.drawableList.add(R.drawable.card_22)
+        gameViewModel.drawableList.add(R.drawable.card_23)
+        gameViewModel.drawableList.add(R.drawable.card_24)
+        gameViewModel.drawableList.add(R.drawable.card_25)
+        gameViewModel.drawableList.add(R.drawable.card_26)
+        gameViewModel.drawableList.add(R.drawable.card_27)
+        gameViewModel.drawableList.add(R.drawable.card_28)
+        gameViewModel.drawableList.add(R.drawable.card_29)
+        gameViewModel.drawableList.add(R.drawable.card_30)
+        gameViewModel.drawableList.add(R.drawable.card_31)
+        gameViewModel.drawableList.add(R.drawable.card_32)
+        gameViewModel.drawableList.add(R.drawable.card_33)
+        gameViewModel.drawableList.add(R.drawable.card_34)
+        gameViewModel.drawableList.add(R.drawable.card_35)
+        gameViewModel.drawableList.add(R.drawable.card_36)
+        gameViewModel.drawableList.add(R.drawable.card_37)
+        gameViewModel.drawableList.add(R.drawable.card_38)
+    }
+    private fun initButtonList(){
         var button00:ImageButton = findViewById(R.id.GameImageButton00)
         var button01:ImageButton = findViewById(R.id.GameImageButton01)
         var button02:ImageButton = findViewById(R.id.GameImageButton02)
@@ -236,36 +204,52 @@ class GameActivity : AppCompatActivity() {
         gameViewModel.buttonList.add(button51)
         gameViewModel.buttonList.add(button52)
         gameViewModel.buttonList.add(button53)
+        initButton()
+    }
+    private fun initButton(){
+        for (button in gameViewModel.buttonList){
+            setImageBack(button)
+            button.isVisible = true
+            button.isEnabled = true
+        }
+    }
+    private fun setUpGame(){
+        gameViewModel.buttonList.clear()
+        gameViewModel.drawableList.clear()
+        gameViewModel.imageButtonMap.clear()
 
+        initButtonList()
+        initDrawableList()
         while(gameViewModel.buttonList.isNotEmpty()){
             initialMap()
         }
+        gameViewModel.count = 0
+        countScoreTextView.text = gameViewModel.count.toString()
     }
 
 
     fun onCardButtonClick(view: View) {
-        gameViewModel.count++
-
         // if it is the first click of a round
-        if(gameViewModel.count % 2 == 1){
+        if(gameViewModel.isFirstClick()){
             gameViewModel.buttonFirstClick = findViewById(view.id)
             val identifier = gameViewModel.imageButtonMap[gameViewModel.buttonFirstClick]!!
-            setImageFront(gameViewModel.buttonFirstClick,identifier)
-
+            gameViewModel.buttonFirstClick.setImageResource(identifier)
+            gameViewModel.onIncrementCount()
         }
-        else if(gameViewModel.count % 2 == 0){
+        else{
             gameViewModel.buttonSecondClick = findViewById(view.id)
             if(gameViewModel.buttonFirstClick != gameViewModel.buttonSecondClick) {
                 var identifier = gameViewModel.imageButtonMap[gameViewModel.buttonSecondClick]!!
-                setImageFront(gameViewModel.buttonSecondClick,identifier)
+                gameViewModel.buttonSecondClick.setImageResource(identifier)
 
                 if (gameViewModel.imageButtonMap[gameViewModel.buttonFirstClick] == gameViewModel.imageButtonMap[gameViewModel.buttonSecondClick]) {
 
-                    gameViewModel.foundPair()
                     Handler().postDelayed({
                         //doSomethingHere()
                         gameViewModel.buttonFirstClick.isVisible = false
                         gameViewModel.buttonSecondClick.isVisible = false
+                        gameViewModel.buttonFirstClick.isEnabled = false
+                        gameViewModel.buttonSecondClick.isEnabled = false
                     }, 300)
                     // pop from map
                     gameViewModel.imageButtonMap.remove(gameViewModel.buttonFirstClick)
@@ -274,15 +258,42 @@ class GameActivity : AppCompatActivity() {
                 else{
                     Handler().postDelayed({
                         //doSomethingHere()
-                        setImageBack(gameViewModel.buttonFirstClick,gameViewModel.buttonSecondClick)
+                        setImageBack(gameViewModel.buttonFirstClick)
+                        setImageBack(gameViewModel.buttonSecondClick)
                     }, 350)
                 }
-            }
-            else{
-                gameViewModel.count--
+                gameViewModel.onIncrementCount()
             }
         }
         countScoreTextView.text = gameViewModel.count.toString()
+        if(gameViewModel.gameEnd()){
+            showGameAlertDialog()
+        }
+
+    }
+
+    private fun showGameAlertDialog(){
+        // build alert dialog
+        val dialogBuilder = AlertDialog.Builder(this)
+
+        // set message of alert dialog
+        dialogBuilder.setTitle("Congrats!")
+            .setMessage("You have tried ${gameViewModel.count} times!")
+            // if the dialog is cancelable
+            .setCancelable(false)
+            // positive button text and action
+            .setPositiveButton("RESTART", DialogInterface.OnClickListener {
+                    dialog, id -> setUpGame()
+            })
+            // negative button text and action
+            .setNegativeButton("CANCEL", DialogInterface.OnClickListener {
+                    dialog, id -> finish()
+            })
+
+        // create dialog box
+        val alert = dialogBuilder.create()
+        // show alert dialog
+        alert.show()
     }
 
 }
